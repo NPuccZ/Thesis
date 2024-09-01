@@ -1,0 +1,77 @@
+! config.cmnd.
+! This file contains commands to be read in for a Pythia8 run.
+! Lines not beginning with a letter or digit are comments.
+
+!Settings used in the main program.
+
+!Main:timesAllowErrors = 20000000          ! allow a few failures before quitting
+
+Beams:idA =  2212                         !beam A
+Beams:idB =  2212			  !beam B
+Beams:eCM = 900.0 
+Random:setSeed=on
+Random:seed=0 
+PartonVertex:setVertex = on
+Fragmentation:setVertices = on
+Tune:pp = 4     !this if for the different pp tunes, monash, 4c , etc ...
+HardQCD:all  = off
+LowEnergyQCD:all  = off
+SoftQCD:inelastic = on
+SoftQCD:elastic = off
+StringPT:sigma = 0.44223380
+StringZ:aLund = 0.360
+StringZ:bLund = 0.560
+StringFlav:probQQtoQ = 0.041858632
+StringFlav:ProbStoUD = 0.200
+StringFlav:probQQ1toQQ0join = {0.0275,0.0275,0.0275,0.0275}
+MultiPartonInteractions:pT0Ref = 2.15
+BeamRemnants:remnantMode = 1.0
+BeamRemnants:saturation = 5.0
+ColourReconnection:reconnect = on
+ColourReconnection:mode = 1.0
+ColourReconnection:range = 1.8
+ColourReconnection:allowDoubleJunRem = off
+ColourReconnection:m0 = 0.30
+ColourReconnection:allowJunctions = on
+ColourReconnection:junctionCorrection = 1.20
+ColourReconnection:timeDilationMode = 2
+ColourReconnection:timeDilationPar = 0.18
+
+!Resonance decay allowed
+113:mayDecay  = true    !rho0
+213:mayDecay  = true    !rho+
+-213:mayDecay  = true   !rho-
+1114:mayDecay  = true   !Delta-
+-1114:mayDecay  = true  !Deltabar+
+2214:mayDecay  = true   !delta+
+-2214:mayDecay  = true  !deltabar-
+2114:mayDecay  = true   !delta0
+-2114:mayDecay  = true  !deltabar0
+2224:mayDecay  = true   !Delta++
+-2224:mayDecay  = true  !Delta--
+
+!decay turned off
+3122:mayDecay  = false    !Lambda0
+-3122:mayDecay  = false   !Lambdabar0
+3112:mayDecay  = false    !Sigma-
+-3112:mayDecay  = false   !Sigma+bar
+3222:mayDecay  = false    !Sigma+
+-3222:mayDecay  = false   !Sigma-bar
+3212:mayDecay  = false    !Sigma0
+-3212:mayDecay  = false   !Sigmabar0
+3334:mayDecay  = false    !Omega-
+-3334:mayDecay  = false   !Omegabar+
+310:mayDecay  = false     !K0S
+311:mayDecay  = false     !K0
+-311:mayDecay  = false    !K0bar
+313:mayDecay  = false     !K*0+
+-313:mayDecay  = false    !K*0bar+
+321:mayDecay  = false     !kaon+
+-321:mayDecay  = false    !kaon-
+2112:mayDecay  = false    !neutron
+-2112:mayDecay  = false   !anti-neutron
+-211:mayDecay  = false    !pi-
+211:mayDecay  = false     !pi+
+111:mayDecay  = false     !pi0
+4122:mayDecay  = false
+421:mayDecay  = false
