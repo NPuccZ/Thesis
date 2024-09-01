@@ -1,0 +1,92 @@
+! config.cmnd.
+! This file contains commands to be read in for a Pythia8 run.
+! Lines not beginning with a letter or digit are comments.
+
+!Settings used in the main program.
+
+!Main:timesAllowErrors = 20000000          ! allow a few failures before quitting
+
+Beams:idA =  2212                         !beam A
+Beams:idB =  2212                         !beam B
+Beams:eCM = 7000.
+Beams:frameType  = 1 !1 collider, 2 fixed-target
+
+Random:setSeed = on
+Random:seed = 0
+PartonVertex:setVertex = on
+Fragmentation:setVertices = on
+
+!set the tune
+Tune:pp = 4     
+HardQCD:all  = off !default
+LowEnergyQCD:all  = off !default
+SoftQCD:inelastic = on
+
+!tune parameters with energy dependence
+!E_p_LAB> 1TeV: sigma_val = 0.35+0.035*log10(E_p_LAB/1e3)
+!StringPT:sigma = 0.36904238 !tuned on E_p_lab = 3500 GeV
+StringPT:sigma = 0.554578431400499  !tuned on E_p_lab = 7000.0 GeV
+
+StringZ:aLund = 0.360 
+StringZ:bLund = 0.560 
+
+!E_p_LAB > 1 TeV: QQtoQ_val = 0.03+0.0045*log10(E_p_LAB/1e3);
+!StringFlav:probQQtoQ = 0.032448306
+StringFlav:probQQtoQ = 0.05630294118006415  !tuned on E_p_lab = 7000.0 GeV
+
+StringFlav:ProbStoUD = 0.200 !fixed above 1 TeV
+StringFlav:probQQ1toQQ0join = {0.0275,0.0275,0.0275,0.0275}
+MultiPartonInteractions:pT0Ref = 2.15
+BeamRemnants:remnantMode = 1.0
+BeamRemnants:saturation = 5.0
+
+!CR mode
+ColourReconnection:reconnect = on
+ColourReconnection:mode = 1.0 !check. Even if this is 1.0 that's actually CR mode 2
+
+ColourReconnection:range = 1.8
+ColourReconnection:allowDoubleJunRem = off
+ColourReconnection:m0 = 0.30
+ColourReconnection:allowJunctions = on
+ColourReconnection:junctionCorrection = 1.20
+ColourReconnection:timeDilationMode = 2
+ColourReconnection:timeDilationPar = 0.18
+
+!Resonance decay allowed
+113:mayDecay  = true    !rho0
+213:mayDecay  = true    !rho+
+-213:mayDecay  = true   !rho-
+1114:mayDecay  = true   !Delta-
+-1114:mayDecay  = true  !Deltabar+
+2214:mayDecay  = true   !delta+
+-2214:mayDecay  = true  !deltabar-
+2114:mayDecay  = true   !delta0
+-2114:mayDecay  = true  !deltabar0
+2224:mayDecay  = true   !Delta++
+-2224:mayDecay  = true  !Delta--
+
+!decay turned off
+3122:mayDecay  = false    !Lambda0
+-3122:mayDecay  = false   !Lambdabar0
+3112:mayDecay  = false    !Sigma-
+-3112:mayDecay  = false   !Sigma+bar
+3222:mayDecay  = false    !Sigma+
+-3222:mayDecay  = false   !Sigma-bar
+3212:mayDecay  = false    !Sigma0
+-3212:mayDecay  = false   !Sigmabar0
+3334:mayDecay  = false    !Omega-
+-3334:mayDecay  = false   !Omegabar+
+310:mayDecay  = false     !K0S
+311:mayDecay  = false     !K0
+-311:mayDecay  = false    !K0bar
+313:mayDecay  = false     !K*0+
+-313:mayDecay  = false    !K*0bar+
+321:mayDecay  = false     !kaon+
+-321:mayDecay  = false    !kaon-
+2112:mayDecay  = false    !neutron
+-2112:mayDecay  = false   !anti-neutron
+-211:mayDecay  = false    !pi-
+211:mayDecay  = false     !pi+
+111:mayDecay  = false     !pi0
+4122:mayDecay  = false    !k0S
+421:mayDecay  = false     !k0bar
