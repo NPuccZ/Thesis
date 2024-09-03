@@ -8,31 +8,39 @@
 
 using namespace std;
 
-double bilinear_interpolation(double plab1, double plab2, double p1, double p2, double cs11, double cs12, double cs21, double cs22, double plab, double pdeut);
-double outCS(double plab, double pd);
+double bilinear_interpolation(double plab1, double plab2, double p1, double p2, double cs11, double cs12, double cs21, double cs22, double plab, double pdeut, bool verbose);
+double outCS(double plab, double pd, bool verbose);
 
 int main(int argc, char *argv[])
 {
-    double plab = atof(argv[1]);
-    double pd = atof(argv[2]);
-    if (argc != 3)
+    if (argc < 3 || argc > 4)
     {
         cerr << "Errore: numero di argomenti non valido." << endl;
+        cerr << "Uso: " << argv[0] << " <plab> <pd> [verbose]" << endl;
         return 1;
     }
-    double CS = 0;
-    cout << "I valori immessi sono i seguenti plab pd: " << plab << " " << pd << endl;
-    CS = outCS(plab, pd);
+
+    double plab = atof(argv[1]);
+    double pd = atof(argv[2]);
+    bool verbose = (argc == 4 && string(argv[3]) == "verbose");
+
+    if (verbose)
+        cout << "I valori immessi sono i seguenti plab pd: " << plab << " " << pd << endl;
+    
+    double CS = outCS(plab, pd, verbose);
+
+    return 0;
 }
 
-double outCS(double plab, double pd)
+double outCS(double plab, double pd, bool verbose)
 {
     static vector<vector<double>> cs; // 2D vector to store the cross sections
-    static vector<vector<double>> cs_ordered;
+    static vector<double> p_lab_grid_ordered;
 
     double CS = 0;
-    const plab_thr = 15.92; // GeV/c fare il conto
-    cout << "I valori immessi sono i seguenti plab pd: " << plab << " " << pd << endl;
+    const double plab_thr = 15.92; // GeV/c fare il conto
+    if (verbose)
+        cout << "I valori immessi sono i seguenti plab pd: " << plab << " " << pd << endl;
 
     const int npbins = 90;
     const double pmin = 0.001;   // GeV/c
@@ -52,7 +60,6 @@ double outCS(double plab, double pd)
     // Apri il file utilizzando ifstream
     if (cs.empty())
     {
-
         ifstream file("cross-sections.txt");
         if (!file.is_open())
         {
@@ -60,7 +67,7 @@ double outCS(double plab, double pd)
             return 1;
         }
 
-        vector<double> p_lab_grid; // Vector to store the p_lab values
+        vector<pair<double, vector<double>>> temp_data; // Temporaneo per il riordino
         string line;
         // Leggi il file riga per riga
         while (getline(file, line))
@@ -68,7 +75,6 @@ double outCS(double plab, double pd)
             stringstream ss(line);
             double plab_value;
             ss >> plab_value; // Estrae il primo valore della riga (p_lab)
-            p_lab_grid.push_back(plab_value);
 
             vector<double> cross_section_row;
             double value;
@@ -76,68 +82,65 @@ double outCS(double plab, double pd)
             {
                 cross_section_row.push_back(value); // Legge tutti i valori rimanenti (cross sections)
             }
-            cs.push_back(cross_section_row);
+
+            temp_data.push_back(make_pair(plab_value, cross_section_row));
         }
 
-        // order the vector p_lab_grid and accordingly the index of the cross sections
-        vector<double> p_lab_grid_ordered = p_lab_grid;
-        sort(p_lab_grid_ordered.begin(), p_lab_grid_ordered.end());
-        // fill the ordered cross sections vector
-        for (size_t i = 0; i < p_lab_grid_ordered.size(); ++i)
+        // Ordina in base a p_lab
+        sort(temp_data.begin(), temp_data.end());
+
+        // Popola i vettori ordinati
+        for (const auto &entry : temp_data)
         {
-            vector<double> cross_section_row;
-            for (size_t j = 0; j < p_lab_grid.size(); ++j)
-            {
-                if (p_lab_grid[j] == p_lab_grid_ordered[i])
-                {
-                    cross_section_row = cs[j];
-                    break;
-                }
-            }
-            cs_ordered.push_back(cross_section_row);
+            p_lab_grid_ordered.push_back(entry.first);
+            cs.push_back(entry.second);
         }
-    }
-    // Ordered list
 
-    // mettere static dump per i cout
+        file.close(); // Chiude il file
+    }
 
     // using the upper_bound function to find the index of the p_lab value in the ordered vector
-    vector<double>::const_iterator index_standard;
-    index_standard = upper_bound(p_lab_grid_ordered.begin(), p_lab_grid_ordered.end(), plab);
+    auto index_standard = upper_bound(p_lab_grid_ordered.begin(), p_lab_grid_ordered.end(), plab);
     int index_plab = index_standard - p_lab_grid_ordered.begin() - 1;
-    cout << "Index plab: " << index_plab << endl;
+    if (verbose)
+        cout << "Index plab: " << index_plab << endl;
 
     // same with the pdeut vector
     index_standard = upper_bound(pdeut.begin(), pdeut.end(), pd);
     int index_pdeut = index_standard - pdeut.begin() - 1;
-    cout << "Index pdeut: " << index_pdeut << endl;
+    if (verbose)
+        cout << "Index pdeut: " << index_pdeut << endl;
+
     if (plab > plab_thr)
     {
         double p_lab1 = p_lab_grid_ordered[index_plab];
         double p_lab2 = p_lab_grid_ordered[index_plab + 1];
         double p1 = pdeut[index_pdeut];
         double p2 = pdeut[index_pdeut + 1];
-        double cs11 = cs_ordered[index_plab][index_pdeut];
-        double cs12 = cs_ordered[index_plab][index_pdeut + 1];
-        double cs21 = cs_ordered[index_plab + 1][index_pdeut];
-        double cs22 = cs_ordered[index_plab + 1][index_pdeut + 1];
-        CS = bilinear_interpolation(p_lab1, p_lab2, p1, p2, cs11, cs12, cs21, cs22, plab, pd);
-        cout << "p_lab1: " << p_lab1 << " p_lab2: " << p_lab2 << endl;
-        cout << "p1: " << p1 << " p2: " << p2 << endl;
-        cout << "cs11: " << cs11 << endl;
-        cout << "CS: " << CS << endl;
+        double cs11 = cs[index_plab][index_pdeut];
+        double cs12 = cs[index_plab][index_pdeut + 1];
+        double cs21 = cs[index_plab + 1][index_pdeut];
+        double cs22 = cs[index_plab + 1][index_pdeut + 1];
+        CS = bilinear_interpolation(p_lab1, p_lab2, p1, p2, cs11, cs12, cs21, cs22, plab, pd, verbose);
+        if (verbose)
+        {
+            cout << "p_lab1: " << p_lab1 << " p_lab2: " << p_lab2 << endl;
+            cout << "p1: " << p1 << " p2: " << p2 << endl;
+            cout << "cs11: " << cs11 << endl;
+            cout << "CS: " << CS << endl;
+        }
     }
     else
     {
         CS = 0;
-        cout << "CS: " << CS << endl;
+        if (verbose)
+            cout << "CS: " << CS << endl;
     }
 
-    file.close(); // Chiude il file
     return CS;
 }
 
-double bilinear_interpolation(double plab1, double plab2, double p1, double p2, double cs11, double cs12, double cs21, double cs22, double plab, double pdeut)
+double bilinear_interpolation(double plab1, double plab2, double p1, double p2, double cs11, double cs12, double cs21, double cs22, double plab, double pdeut, bool verbose)
 {
     double logcs11 = (cs11 > 0) ? log10(cs11) : -100;
     double logcs12 = (cs12 > 0) ? log10(cs12) : -100;
@@ -149,6 +152,9 @@ double bilinear_interpolation(double plab1, double plab2, double p1, double p2, 
                  logcs12 * (log10(plab2) - log10(plab)) * (log10(pdeut) - log10(p1)) +
                  logcs22 * (log10(plab) - log10(plab1)) * (log10(pdeut) - log10(p1))) /
                 ((log10(plab2) - log10(plab1)) * (log10(p2) - log10(p1)));
+
+    if (verbose)
+        cout << "Interpolated CS (log): " << cs << endl;
 
     return pow(10., cs);
 }
