@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
 {
     if (argc < 3 || argc > 4)
     {
-        cerr << "Error: invalid arguments." << endl;
-        cerr << "Usage: " << argv[0] << " <plab> <pd> [verbose]" << endl;
+        cerr << "Errore: numero di argomenti non valido." << endl;
+        cerr << "Uso: " << argv[0] << " <plab> <pd> [verbose]" << endl;
         return 1;
     }
 
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     bool verbose = (argc == 4 && string(argv[3]) == "verbose");
 
     if (verbose)
-        cout << "Input values of plab pd: " << plab << " " << pd << endl;
+        cout << "I valori immessi sono i seguenti plab pd: " << plab << " " << pd << endl;
     
     double CS = outCS(plab, pd, verbose);
 
@@ -40,7 +40,7 @@ double outCS(double plab, double pd, bool verbose)
     double CS = 0;
     const double plab_thr = 15.92; // GeV/c fare il conto
     if (verbose)
-        cout << "Input values are plab pd: " << plab << " " << pd << endl;
+        cout << "I valori immessi sono i seguenti plab pd: " << plab << " " << pd << endl;
 
     const int npbins = 90;
     const double pmin = 0.001;   // GeV/c
@@ -57,39 +57,48 @@ double outCS(double plab, double pd, bool verbose)
         pdeut.push_back(sqrt(pbins[ip] * pbins[ip + 1]));
     }
 
-    // Open the file with ifstream
+    // Apri il file utilizzando ifstream
     if (cs.empty())
     {
+        /*
         ifstream file("cross-sections.txt");
         if (!file.is_open())
         {
             cerr << "Errore: impossibile aprire il file cross-sections.txt" << endl;
             return 1;
+        }*/
+        const char* envVar = "TABLE";
+        const char* filePath = getenv(envVar)
+        ifstream file2(filePath);
+        if (!file2.is_open())
+        {
+            cerr << "Errore: impossibile aprire il file cross-sections.txt" << endl;
+            return 1;
         }
 
-        vector<pair<double, vector<double>>> temp_data; // Temporary storing for reordering
+        vector<pair<double, vector<double>>> temp_data; // Temporaneo per il riordino
         string line;
-        // Read the file line by line
-        while (getline(file, line))
+        // Leggi il file riga per riga
+        while (getline(file2, line))
         {
             stringstream ss(line);
             double plab_value;
-            ss >> plab_value; // Extract the first value (p_lab)
+            ss >> plab_value; // Estrae il primo valore della riga (p_lab)
 
             vector<double> cross_section_row;
             double value;
             while (ss >> value)
             {
-                cross_section_row.push_back(value); // Extract remaining values (cross sections)
+                cross_section_row.push_back(value); // Legge tutti i valori rimanenti (cross sections)
             }
 
             temp_data.push_back(make_pair(plab_value, cross_section_row));
         }
 
-        // Order according to p_lab value
+        // Ordina in base a p_lab
         sort(temp_data.begin(), temp_data.end());
 
-        // Populate ordered vectors
+        // Popola i vettori ordinati
         for (const auto &entry : temp_data)
         {
             p_lab_grid_ordered.push_back(entry.first);
